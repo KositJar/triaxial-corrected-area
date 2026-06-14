@@ -70,14 +70,6 @@ st.set_page_config(
     layout="wide",
 )
 
-_ic_col, _title_col = st.columns([1, 9])
-with _ic_col:
-    if ICON_PATH.exists():
-        st.image(str(ICON_PATH), use_container_width=True)
-with _title_col:
-    st.title(f"Triaxial Test — Corrected Cross-Section Area  v{APP_VERSION}")
-    st.caption("Developed by Kosit Jariyatatsakorn")
-
 # ── Password gate ────────────────────────────────────────────────────────────
 def _check_password() -> bool:
     """Return True if authenticated. No-op when APP_PASSWORD secret is not set."""
@@ -115,7 +107,7 @@ def _check_password() -> bool:
                     st.image(str(ICON_PATH), use_container_width=True)
 
             st.markdown(f"""
-            <div style="text-align:center; padding:10px 0 4px 0;">
+            <div style="text-align:center; padding:10px 0 2px 0;">
                 <span style="font-size:1.2rem; font-weight:700;">
                     Triaxial Test — Corrected Cross-Section Area
                 </span>
@@ -123,7 +115,10 @@ def _check_password() -> bool:
                     v{APP_VERSION}
                 </span>
             </div>
-            <p style="text-align:center; color:#9aa0b0; font-size:0.85rem; margin:4px 0 16px 0;">
+            <p style="text-align:center; color:#6b7280; font-size:0.78rem; margin:2px 0 6px 0;">
+                Developed by Kosit Jariyatatsakorn
+            </p>
+            <p style="text-align:center; color:#9aa0b0; font-size:0.85rem; margin:0 0 16px 0;">
                 Lab access only — enter the password to continue.
             </p>
             """, unsafe_allow_html=True)
@@ -145,6 +140,15 @@ def _check_password() -> bool:
 
 if not _check_password():
     st.stop()
+
+# ── Title header (shown only after login) ────────────────────────────────────
+_ic_col, _title_col = st.columns([1, 9])
+with _ic_col:
+    if ICON_PATH.exists():
+        st.image(str(ICON_PATH), use_container_width=True)
+with _title_col:
+    st.title(f"Triaxial Test — Corrected Cross-Section Area  v{APP_VERSION}")
+    st.caption("Developed by Kosit Jariyatatsakorn")
 
 # ── Sidebar: parameters ──────────────────────────────────────────────────────
 with st.sidebar:
