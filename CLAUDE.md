@@ -49,7 +49,7 @@ triaxial_app/
 ├── .streamlit/
 │   └── secrets.toml        # LOCAL ONLY — never committed (APP_PASSWORD)
 ├── icon/
-│   └── icon_app.png        # App logo (shown in login card, title bar, browser tab)
+│   └── icon_app_v2.png     # App logo (shown in login card, title bar, browser tab)
 └── Source Files/           # Original MATLAB references
     ├── Updated_R_value_v3.mlx      # v1 reference (constant temperature)
     └── Corection_TE_R_value.mlx    # v2 source (non-constant temperature)
@@ -88,7 +88,7 @@ Parameters:
 
 ### `app.py`
 UI flow (in order):
-1. `st.set_page_config` — uses icon_app.png as favicon
+1. `st.set_page_config` — uses icon_app_v2.png as favicon
 2. `_check_password()` — login card (shown when not authenticated, then `st.stop()`)
 3. Title header with icon (shown only after login)
 4. Title header → top nav popover bar (📋 Version History, 🔍 How It's Calculated) → scope banner

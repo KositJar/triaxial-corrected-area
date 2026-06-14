@@ -33,7 +33,7 @@ from calculator import (
 APP_VERSION = "3.2"
 APP_DATE = "2026-06-14"
 CONFIG_PATH = Path(__file__).parent / "config.json"
-ICON_PATH = Path(__file__).parent / "icon" / "icon_app.png"
+ICON_PATH = Path(__file__).parent / "icon" / "icon_app_v2.png"
 
 DEFAULT_CONFIG = {
     "H0": 150.0,

@@ -28,6 +28,7 @@ Copyright © 2026 Kosit Jariyatatsakorn. All rights reserved.
   non-constant temperature modes.
 - Added a scope banner on the main page.
 - Updated `run_tests.py` to drop the removed `u` argument (4 call sites).
+- Replaced the app icon with `icon_app_v2.png` (login card, title bar, favicon).
 
 ## v3.1 — 2026-06-14
 
