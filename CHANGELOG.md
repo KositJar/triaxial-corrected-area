@@ -8,6 +8,17 @@ Copyright © 2026 Kosit Jariyatatsakorn. All rights reserved.
 
 ---
 
+## v3.4 — 2026-06-14
+
+- The top-nav **"Other Tools"** button is now a **dropdown menu** (popover),
+  built to hold multiple tools over time via the `OTHER_TOOLS` list in `app.py`.
+- First item: **3Comp** — the icon-only mark plus the name "3Comp" and the
+  subtitle "NTC Creep Simulator". The whole row is clickable and opens
+  https://kositjar.github.io/ntc-creep-simulator/ in a new tab.
+- Added `icon/icon_3comp.png` (copied from the ntc-creep-simulator repo) and a
+  cached `icon_data_uri()` helper that downscales icons and embeds them inline.
+- Pinned `pillow>=10.0` in requirements.
+
 ## v3.3 — 2026-06-14
 
 - New app icon (`icon_app_v2.png`) across login card, title bar, and favicon.

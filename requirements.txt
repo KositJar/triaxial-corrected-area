@@ -1,5 +1,6 @@
-# v3.2 — bumped to force a clean Streamlit Cloud environment rebuild
+# v3.4 — bumped to force a clean Streamlit Cloud environment rebuild
 # (st.popover requires streamlit >= 1.31; pinning a higher floor here)
 streamlit>=1.37
 numpy>=1.24
 pandas>=2.0
+pillow>=10.0  # used to downscale the 3Comp icon for the Other Tools dropdown

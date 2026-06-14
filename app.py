@@ -16,7 +16,10 @@
 #                      scope banner on main page
 #   v3.3 (2026-06-14): New app icon; "Other Tools" nav button linking to the
 #                      NTC Creep Simulator; equal-height single-line nav buttons
+#   v3.4 (2026-06-14): "Other Tools" is now a dropdown menu — first item is the
+#                      3Comp app (icon + name, clickable, opens in a new tab).
 
+import base64
 import io
 import json
 import zipfile
@@ -32,10 +35,22 @@ from calculator import (
     read_dat_headers,
 )
 
-APP_VERSION = "3.3"
+APP_VERSION = "3.4"
 APP_DATE = "2026-06-14"
 CONFIG_PATH = Path(__file__).parent / "config.json"
 ICON_PATH = Path(__file__).parent / "icon" / "icon_app_v2.png"
+ICON_3COMP_PATH = Path(__file__).parent / "icon" / "icon_3comp.png"
+
+# ── Other Tools registry (extend this list to add more tools to the dropdown) ──
+NTC_CREEP_URL = "https://kositjar.github.io/ntc-creep-simulator/"
+OTHER_TOOLS = [
+    {
+        "name": "3Comp",
+        "subtitle": "NTC Creep Simulator",
+        "url": NTC_CREEP_URL,
+        "icon": ICON_3COMP_PATH,
+    },
+]
 
 DEFAULT_CONFIG = {
     "H0": 150.0,
@@ -61,6 +76,27 @@ def load_config() -> dict:
 def save_config(cfg: dict) -> None:
     with open(CONFIG_PATH, "w") as f:
         json.dump(cfg, f, indent=2)
+
+
+@st.cache_data(show_spinner=False)
+def icon_data_uri(path_str: str, size: int = 80) -> str:
+    """Return a small base64 PNG data URI for an icon, or '' if unavailable.
+
+    Downscaled to `size` px so it can be embedded inline cheaply.
+    """
+    p = Path(path_str)
+    if not p.exists():
+        return ""
+    try:
+        from PIL import Image
+        img = Image.open(p).convert("RGBA")
+        img.thumbnail((size, size), Image.LANCZOS)
+        buf = io.BytesIO()
+        img.save(buf, format="PNG")
+        raw = buf.getvalue()
+    except Exception:
+        raw = p.read_bytes()  # fall back to the full-size image
+    return "data:image/png;base64," + base64.b64encode(raw).decode()
 
 
 # ── Page setup ──────────────────────────────────────────────────────────────
@@ -224,6 +260,8 @@ def _render_how_its_calculated() -> None:
 def _render_version_history() -> None:
     st.markdown("### 📋 Version History")
     st.markdown(
+        "**v3.4** (2026-06-14): \"Other Tools\" is now a dropdown menu — first item "
+        "is the 3Comp app (icon + name, opens in a new tab)  \n"
         "**v3.3** (2026-06-14): New app icon; \"Other Tools\" nav button (NTC Creep "
         "Simulator); equal-height nav buttons  \n"
         "**v3.2** (2026-06-14): Scoped to consolidated drained (CD) "
@@ -237,12 +275,47 @@ def _render_version_history() -> None:
     )
 
 
+def _render_other_tools() -> None:
+    """Render the Other Tools dropdown: one clickable icon + name row per tool."""
+    st.markdown("### 🔗 Other Tools")
+    st.markdown(
+        """
+        <style>
+        a.tool-link {
+            display: flex; align-items: center; gap: 12px;
+            padding: 8px 10px; margin: 2px 0; border-radius: 10px;
+            text-decoration: none; color: inherit;
+        }
+        a.tool-link:hover { background: rgba(255, 255, 255, 0.07); }
+        a.tool-link img { width: 40px; height: 40px; border-radius: 8px;
+                          object-fit: contain; }
+        a.tool-link .tool-name { font-weight: 600; font-size: 0.95rem;
+                                 line-height: 1.15; }
+        a.tool-link .tool-sub  { color: #9aa0b0; font-size: 0.78rem; }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+    for tool in OTHER_TOOLS:
+        uri = icon_data_uri(str(tool["icon"]))
+        img_html = (
+            f'<img src="{uri}" alt="{tool["name"]}"/>' if uri
+            else '<span style="font-size:1.6rem;">🔗</span>'
+        )
+        st.markdown(
+            f'<a class="tool-link" href="{tool["url"]}" target="_blank" '
+            f'rel="noopener noreferrer">{img_html}'
+            f'<span><span class="tool-name">{tool["name"]}</span><br>'
+            f'<span class="tool-sub">{tool["subtitle"]}</span></span></a>',
+            unsafe_allow_html=True,
+        )
+
+
 # Keep all nav buttons on a single line and the same height (scoped to this row).
 st.markdown(
     "<style>.st-key-topnav button, .st-key-topnav a { white-space: nowrap; }</style>",
     unsafe_allow_html=True,
 )
-NTC_CREEP_URL = "https://kositjar.github.io/ntc-creep-simulator/"
 with st.container(key="topnav"):
     _nav1, _nav2, _nav3, _nav_spacer = st.columns([2, 2.2, 2, 3.8])
     with _nav1:
@@ -252,11 +325,8 @@ with st.container(key="topnav"):
         with st.popover("🔍 How It's Calculated", use_container_width=True):
             _render_how_its_calculated()
     with _nav3:
-        st.link_button(
-            "🔗 Other Tools",
-            NTC_CREEP_URL,
-            use_container_width=True,
-        )
+        with st.popover("🔗 Other Tools", use_container_width=True):
+            _render_other_tools()
 
 # ── Scope banner ─────────────────────────────────────────────────────────────
 st.info(
