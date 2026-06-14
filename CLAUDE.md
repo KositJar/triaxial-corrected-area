@@ -10,7 +10,7 @@ Streamlit web app replacing MATLAB for **drained triaxial test corrected cross-s
 
 ---
 
-## Current Version: v3.2 (2026-06-14)
+## Current Version: v3.3 (2026-06-14)
 
 > **Canonical change log:** `CHANGELOG.md`. Keep it, this table, the file header
 > comments, and the in-app Version History popover in sync on every release.
@@ -30,6 +30,7 @@ there is no `u` parameter anywhere in the code or UI.
 | v3.0 | 2026-06-12 | Multiple LVDT support with aliases, full English UI, version number in title |
 | v3.1 | 2026-06-14 | Minimal centered login card, blue Enter button, hide title on login page, removed icon from sidebar |
 | v3.2 | 2026-06-14 | Scoped to CD air-dried sand: removed `u` input (u=0 → eff=total stress), top nav popover bar, "How It's Calculated" LaTeX page, scope banner |
+| v3.3 | 2026-06-14 | New app icon; "Other Tools" nav button (NTC Creep Simulator link); equal-height single-line nav buttons |
 
 ---
 
@@ -91,7 +92,7 @@ UI flow (in order):
 1. `st.set_page_config` — uses icon_app_v2.png as favicon
 2. `_check_password()` — login card (shown when not authenticated, then `st.stop()`)
 3. Title header with icon (shown only after login)
-4. Title header → top nav popover bar (📋 Version History, 🔍 How It's Calculated) → scope banner
+4. Title header → top nav bar (📋 Version History, 🔍 How It's Calculated, 🔗 Other Tools link) → scope banner
 5. Sidebar: H0, Dia, σ3, C/C1/C2, smoothing, temperature mode (no `u`)
 6. Main area: How-to expander → file upload → LVDT selector → output settings → Process button → results
 

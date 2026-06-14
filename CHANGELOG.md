@@ -8,6 +8,15 @@ Copyright © 2026 Kosit Jariyatatsakorn. All rights reserved.
 
 ---
 
+## v3.3 — 2026-06-14
+
+- New app icon (`icon_app_v2.png`) across login card, title bar, and favicon.
+- Added an **"Other Tools"** button to the top navigation bar, linking out to the
+  [NTC Creep Simulator](https://kositjar.github.io/ntc-creep-simulator/)
+  (opens in a new tab).
+- Made the top-nav buttons single-line and equal height (fixes the "Version
+  History" button wrapping to two lines and looking taller than the others).
+
 ## v3.2 — 2026-06-14
 
 **Scoped to consolidated drained (CD) triaxial tests on air-dried sand.**

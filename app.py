@@ -14,6 +14,8 @@
 #                      eff stresses = total stresses); top nav popover bar
 #                      (Version History + "How It's Calculated" LaTeX page);
 #                      scope banner on main page
+#   v3.3 (2026-06-14): New app icon; "Other Tools" nav button linking to the
+#                      NTC Creep Simulator; equal-height single-line nav buttons
 
 import io
 import json
@@ -30,7 +32,7 @@ from calculator import (
     read_dat_headers,
 )
 
-APP_VERSION = "3.2"
+APP_VERSION = "3.3"
 APP_DATE = "2026-06-14"
 CONFIG_PATH = Path(__file__).parent / "config.json"
 ICON_PATH = Path(__file__).parent / "icon" / "icon_app_v2.png"
@@ -222,7 +224,9 @@ def _render_how_its_calculated() -> None:
 def _render_version_history() -> None:
     st.markdown("### 📋 Version History")
     st.markdown(
-        f"**v{APP_VERSION}** ({APP_DATE}): Scoped to consolidated drained (CD) "
+        "**v3.3** (2026-06-14): New app icon; \"Other Tools\" nav button (NTC Creep "
+        "Simulator); equal-height nav buttons  \n"
+        "**v3.2** (2026-06-14): Scoped to consolidated drained (CD) "
         "tests on air-dried sand — removed pore-pressure (u) input (u = 0 → "
         "σ′ = σ); top navigation bar; \"How It's Calculated\" equation page (LaTeX); "
         "scope banner  \n"
@@ -233,13 +237,26 @@ def _render_version_history() -> None:
     )
 
 
-_nav1, _nav2, _nav_spacer = st.columns([1.2, 1.6, 6])
-with _nav1:
-    with st.popover("📋 Version History", use_container_width=True):
-        _render_version_history()
-with _nav2:
-    with st.popover("🔍 How It's Calculated", use_container_width=True):
-        _render_how_its_calculated()
+# Keep all nav buttons on a single line and the same height (scoped to this row).
+st.markdown(
+    "<style>.st-key-topnav button, .st-key-topnav a { white-space: nowrap; }</style>",
+    unsafe_allow_html=True,
+)
+NTC_CREEP_URL = "https://kositjar.github.io/ntc-creep-simulator/"
+with st.container(key="topnav"):
+    _nav1, _nav2, _nav3, _nav_spacer = st.columns([2, 2.2, 2, 3.8])
+    with _nav1:
+        with st.popover("📋 Version History", use_container_width=True):
+            _render_version_history()
+    with _nav2:
+        with st.popover("🔍 How It's Calculated", use_container_width=True):
+            _render_how_its_calculated()
+    with _nav3:
+        st.link_button(
+            "🔗 Other Tools",
+            NTC_CREEP_URL,
+            use_container_width=True,
+        )
 
 # ── Scope banner ─────────────────────────────────────────────────────────────
 st.info(
