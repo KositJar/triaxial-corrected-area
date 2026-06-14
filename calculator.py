@@ -6,6 +6,10 @@
 #   v2.0 (2026-06-12): Non-constant temperature correction, column selector
 #   v3.0 (2026-06-12): Explicit LVDT column selection (disp_col_name parameter),
 #                      LVDT alias support in output filename, English error messages
+#   v3.2 (2026-06-14): Scoped to consolidated drained (CD) tests on air-dried sand.
+#                      Drainage valve open during shearing => u = 0, so effective
+#                      stresses equal total stresses. Removed the `u` parameter:
+#                      eff_sig_3 = sig_3 and eff_sig_1 = sig_1 directly.
 
 import re
 
@@ -36,7 +40,6 @@ def process_dat_file(
     H0: float,
     Dia: float,
     sig_3: float,
-    u: float,
     C: float,
     C1: float,
     C2: float,
@@ -52,13 +55,17 @@ def process_dat_file(
     Read a raw tab-delimited .dat file and return a DataFrame with input columns
     (filtered by keep_input_cols) plus 10 calculated columns appended.
 
+    Assumption: consolidated drained (CD) triaxial test on an air-dried sand
+    specimen. The drainage valve is open throughout shearing, so pore pressure
+    u = 0 and effective stresses equal total stresses (eff_sig_1 = sig_1,
+    eff_sig_3 = sig_3). There is therefore no `u` parameter.
+
     Parameters
     ----------
     file_obj        : file-like object or path
     H0              : initial specimen height (mm)
     Dia             : specimen diameter (mm)
     sig_3           : confining pressure (kPa)
-    u               : pore pressure (kPa)
     C, C1, C2       : Rowe's parabola coefficients  C2*D^2 + C1*D + (C - R) = 0
     smooth_window   : rolling-mean window for displacement (1 = no smoothing)
     temp_mode       : "constant" (default) or "non_constant"
@@ -164,12 +171,14 @@ def process_dat_file(
     eff_sig_1 = np.zeros(n)
     R = np.zeros(n)
 
-    eff_sig_3 = sig_3 - u
+    # Air-dried sand, drained shearing (valve open) => u = 0, so effective
+    # stresses equal total stresses.
+    eff_sig_3 = sig_3
 
     for i in range(n):
         q[i] = load[i] * 1000.0 / A[i]
         sig_1[i] = sig_3 + q[i]
-        eff_sig_1[i] = sig_1[i] - u
+        eff_sig_1[i] = sig_1[i]
         R[i] = eff_sig_1[i] / eff_sig_3
 
         # Solve C2*D^2 + C1*D + (C - R) = 0 — take minimum real root

@@ -446,7 +446,6 @@ def build_pdf(shots: dict):
         ["H0", "ความสูงเริ่มต้นของตัวอย่างดิน", "mm", "140.0"],
         ["Dia", "เส้นผ่านศูนย์กลางตัวอย่างดิน", "mm", "70.0"],
         ["s3 (sig_3)", "ความดันด้านข้าง (Confining pressure)", "kPa", "30.0"],
-        ["u", "Pore pressure (0 สำหรับ air-dried)", "kPa", "0.0"],
         ["C", "Rowe's constant C0", "-", "-4.42395"],
         ["C1", "Rowe's constant C1", "-", "10.00"],
         ["C2", "Rowe's constant C2", "-", "-2.77"],
@@ -565,7 +564,8 @@ def build_pdf(shots: dict):
         SP(4),
         H2("Stress Ratio"),
         Paragraph(
-            "R = (sig_3 + q - u) / (sig_3 - u)",
+            "R = sig_1 / sig_3 = (sig_3 + q) / sig_3 &nbsp;&nbsp;[u = 0 for "
+            "drained air-dried sand, so eff. stress = total stress]",
             S["code"],
         ),
         SP(4),

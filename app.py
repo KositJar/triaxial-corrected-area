@@ -9,6 +9,11 @@
 #                      version number in title
 #   v3.1 (2026-06-14): Minimal centered login card, blue Enter button,
 #                      removed icon from sidebar
+#   v3.2 (2026-06-14): Scoped to consolidated drained (CD) tests on air-dried
+#                      sand — removed pore-pressure (u) input (u = 0 always, so
+#                      eff stresses = total stresses); top nav popover bar
+#                      (Version History + "How It's Calculated" LaTeX page);
+#                      scope banner on main page
 
 import io
 import json
@@ -25,7 +30,7 @@ from calculator import (
     read_dat_headers,
 )
 
-APP_VERSION = "3.1"
+APP_VERSION = "3.2"
 APP_DATE = "2026-06-14"
 CONFIG_PATH = Path(__file__).parent / "config.json"
 ICON_PATH = Path(__file__).parent / "icon" / "icon_app.png"
@@ -34,7 +39,6 @@ DEFAULT_CONFIG = {
     "H0": 150.0,
     "Dia": 70.0,
     "sig_3": 30.0,
-    "u": 0.0,
     "C": -4.42395,
     "C1": 10.00,
     "C2": -2.77,
@@ -150,6 +154,99 @@ with _title_col:
     st.title(f"Triaxial Test — Corrected Cross-Section Area  v{APP_VERSION}")
     st.caption("Developed by Kosit Jariyatatsakorn")
 
+# ── Top navigation bar (popover buttons) ─────────────────────────────────────
+def _render_how_its_calculated() -> None:
+    """Render the calculation flow as rendered LaTeX equations, in pipeline order."""
+    st.markdown("### 🔍 How It's Calculated")
+    st.markdown(
+        "Below is the full calculation flow, from the raw lab `.dat` file to the "
+        "corrected cross-section area and stress ratio. Symbols: "
+        "$d$ = displacement reading, $H_0$ = initial height, $D$ = specimen "
+        "diameter, $P$ = axial load, $\\sigma_3$ = confining pressure."
+    )
+
+    st.markdown("#### 0 · Governing assumption")
+    st.markdown(
+        "This app is for a **consolidated drained (CD)** triaxial test on an "
+        "**air-dried sand** specimen. The drainage valve is open throughout "
+        "shearing, so the pore pressure is always zero:"
+    )
+    st.latex(r"u = 0 \;\;\Longrightarrow\;\; \sigma'_1 = \sigma_1, \quad \sigma'_3 = \sigma_3")
+    st.caption("Effective stresses equal total stresses — there is no σ₃ − u term.")
+
+    st.markdown("#### 1 · Initial cross-section area")
+    st.latex(r"A_0 = \frac{\pi}{4}\, D^2")
+
+    st.markdown("#### 2 · Axial strain $\\varepsilon_a$")
+    st.markdown("**Constant-temperature mode** — referenced to the first reading:")
+    st.latex(r"\varepsilon_{a,i} = \frac{d_i - d_0}{H_0}\times 100\ \ (\%)")
+    st.markdown(
+        "**Non-constant-temperature mode** — corrects the measured displacement "
+        "for thermal expansion of the apparatus (iterative, with "
+        "$\\Delta T_i = T_i - T_0$, apparatus height $L_0$ and expansion "
+        "coefficient $\\alpha$):"
+    )
+    st.latex(r"\Delta T_i = T_i - T_0")
+    st.latex(r"d_{\text{sand},\,i+1} = d_{\text{meas},\,i} + \alpha\,\bigl(L_0 + d_{\text{sand},\,i}\bigr)\,\Delta T_i")
+    st.latex(r"\varepsilon_{a,i} = \frac{d_{\text{sand},\,i+1}}{H_0}\times 100\ \ (\%)")
+
+    st.markdown("#### 3 · Axial strain rate (central finite difference)")
+    st.latex(r"\dot{\varepsilon}_{a,i} = \tfrac{1}{2}\left(\frac{\Delta\varepsilon_a}{\Delta t}\bigg|_{i} + \frac{\Delta\varepsilon_a}{\Delta t}\bigg|_{i-1}\right)")
+    st.caption("Forward difference is used at the first and last points.")
+
+    st.markdown("#### 4 · Stresses (with corrected area $A_i$)")
+    st.markdown("Deviator stress (load $P$ in N, area in mm² → kPa):")
+    st.latex(r"q_i = \frac{P_i \times 1000}{A_i}")
+    st.latex(r"\sigma_{1,i} = \sigma_3 + q_i")
+    st.markdown("Effective stresses (since $u = 0$):")
+    st.latex(r"\sigma'_{1,i} = \sigma_{1,i}, \qquad \sigma'_3 = \sigma_3")
+    st.latex(r"R_i = \frac{\sigma'_{1,i}}{\sigma'_3} = \frac{\sigma_{1,i}}{\sigma_3}")
+
+    st.markdown("#### 5 · Rowe's stress–dilatancy relation")
+    st.markdown("The dilatancy $D$ is the minimum real root of Rowe's parabola:")
+    st.latex(r"C_2\,D^2 + C_1\,D + (C - R_i) = 0")
+    st.latex(r"D_i = \min\!\left(\frac{-C_1 \pm \sqrt{C_1^2 - 4 C_2 (C - R_i)}}{2 C_2}\right)")
+
+    st.markdown("#### 6 · Volumetric strain")
+    st.latex(r"\Delta\varepsilon_{vol,\,i} = (1 - D_i)\,\dot{\varepsilon}_{a,i}")
+    st.latex(r"\varepsilon_{vol,\,i} = \sum_{k=0}^{i}\Delta\varepsilon_{vol,\,k}")
+
+    st.markdown("#### 7 · Corrected cross-section area")
+    st.latex(r"A_{i+1} = A_0\,\frac{1 - \varepsilon_{vol,\,i}/100}{1 - \varepsilon_{a,i}/100}")
+    st.caption(
+        "This corrected area feeds back into step 4 for the next data point — "
+        "the loop is sequential."
+    )
+
+
+def _render_version_history() -> None:
+    st.markdown("### 📋 Version History")
+    st.markdown(
+        f"**v{APP_VERSION}** ({APP_DATE}): Scoped to consolidated drained (CD) "
+        "tests on air-dried sand — removed pore-pressure (u) input (u = 0 → "
+        "σ′ = σ); top navigation bar; \"How It's Calculated\" equation page (LaTeX); "
+        "scope banner  \n"
+        "**v3.1** (2026-06-14): Minimal centered login card, blue Enter button, sidebar cleanup  \n"
+        "**v3.0** (2026-06-12): Multiple LVDT support with aliases, full English UI  \n"
+        "**v2.0** (2026-06-12): Temperature correction mode, column selector, How-to, copyright  \n"
+        "**v1.0** (2026-06-11): Initial release"
+    )
+
+
+_nav1, _nav2, _nav_spacer = st.columns([1.2, 1.6, 6])
+with _nav1:
+    with st.popover("📋 Version History", use_container_width=True):
+        _render_version_history()
+with _nav2:
+    with st.popover("🔍 How It's Calculated", use_container_width=True):
+        _render_how_its_calculated()
+
+# ── Scope banner ─────────────────────────────────────────────────────────────
+st.info(
+    "ℹ️ This app is only valid for **consolidated drained (CD)** triaxial tests "
+    "on **air-dried sand** specimens."
+)
+
 # ── Sidebar: parameters ──────────────────────────────────────────────────────
 with st.sidebar:
     st.header("Parameters")
@@ -170,10 +267,9 @@ with st.sidebar:
         value=float(cfg.get("sig_3", 30.0)),
         min_value=0.0, step=1.0, format="%.3f",
     )
-    u = st.number_input(
-        "u — Pore pressure (kPa)",
-        value=float(cfg.get("u", 0.0)),
-        step=0.1, format="%.3f",
+    st.caption(
+        "Air-dried sand, drained shearing → u = 0, so σ′₃ = σ₃ and σ′₁ = σ₁ "
+        "(no pore-pressure input needed)."
     )
 
     st.markdown("**Rowe's constants** — fitted from saturated specimen")
@@ -219,17 +315,9 @@ with st.sidebar:
         )
 
     st.divider()
-    with st.expander("📋 Version History"):
-        st.markdown(
-            f"**v{APP_VERSION}** ({APP_DATE}): Minimal login card, blue button, sidebar cleanup  \n"
-            "**v3.0** (2026-06-12): Multiple LVDT support with aliases, full English UI  \n"
-            "**v2.0** (2026-06-12): Temperature correction mode, column selector, How-to, copyright  \n"
-            "**v1.0** (2026-06-11): Initial release"
-        )
-
     if st.button("💾 Save as default config", use_container_width=True):
         save_config({
-            "H0": H0, "Dia": Dia, "sig_3": sig_3, "u": u,
+            "H0": H0, "Dia": Dia, "sig_3": sig_3,
             "C": C, "C1": C1, "C2": C2,
             "smooth_window": smooth_window,
             "temp_mode": temp_mode,
@@ -249,7 +337,6 @@ with st.expander("❓ How to Use", expanded=False):
    - H₀: Initial specimen height (mm)
    - Dia: Diameter (mm)
    - σ₃: Confining pressure (kPa)
-   - u: Pore pressure (kPa — use 0 for air-dried)
    - C, C1, C2: Rowe's constants fitted from saturated specimen
 
 2. **Select Temperature mode**
@@ -410,7 +497,7 @@ for upload in uploaded_files:
         try:
             df_result = process_dat_file(
                 io.StringIO(content),
-                H0=H0, Dia=Dia, sig_3=sig_3, u=u,
+                H0=H0, Dia=Dia, sig_3=sig_3,
                 C=C, C1=C1, C2=C2,
                 smooth_window=int(smooth_window),
                 temp_mode=temp_mode,

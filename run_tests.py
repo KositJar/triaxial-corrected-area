@@ -21,7 +21,7 @@ with open(DAT, encoding="utf-8", errors="replace") as f:
     content = f.read()
 
 df = process_dat_file(
-    io.StringIO(content), H0=150.0, Dia=70.0, sig_3=30.0, u=0.0,
+    io.StringIO(content), H0=150.0, Dia=70.0, sig_3=30.0,
     C=-4.42395, C1=10.0, C2=-2.77, temp_mode="constant",
 )
 print("Test 1: Constant mode (regression)")
@@ -32,7 +32,7 @@ check(f"R[0]={df['R'].iloc[0]:.7f} ~= 1.0045373", abs(df["R"].iloc[0] - 1.004537
 
 # ── Test 2: Column selector ──────────────────────────────────────────────────
 df2 = process_dat_file(
-    io.StringIO(content), H0=150.0, Dia=70.0, sig_3=30.0, u=0.0,
+    io.StringIO(content), H0=150.0, Dia=70.0, sig_3=30.0,
     C=-4.42395, C1=10.0, C2=-2.77,
     keep_input_cols=["Time(s)", "Load_(N)", "Disp.(mm)"],
 )
@@ -54,7 +54,7 @@ pd.DataFrame({
 buf.seek(0)
 
 df3 = process_dat_file(
-    buf, H0=150.0, Dia=70.0, sig_3=30.0, u=0.0,
+    buf, H0=150.0, Dia=70.0, sig_3=30.0,
     C=-4.42395, C1=10.0, C2=-2.77,
     temp_mode="non_constant",
     L0_app=260.0, alpha_app=0.000017,
@@ -82,7 +82,7 @@ check("Third col = Disp.(mm)", headers[2] == "Disp.(mm)")
 print("\nTest 5: Error on missing Temperature column")
 try:
     process_dat_file(
-        io.StringIO(content[:5000]), H0=150.0, Dia=70.0, sig_3=30.0, u=0.0,
+        io.StringIO(content[:5000]), H0=150.0, Dia=70.0, sig_3=30.0,
         C=-4.42395, C1=10.0, C2=-2.77,
         temp_mode="non_constant",
         temp_col_name="NONEXISTENT_COL",
