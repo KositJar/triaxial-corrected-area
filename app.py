@@ -26,6 +26,7 @@ from calculator import (
 APP_VERSION = "3.0"
 APP_DATE = "2026-06-12"
 CONFIG_PATH = Path(__file__).parent / "config.json"
+ICON_PATH = Path(__file__).parent / "icon" / "icon_app.png"
 
 DEFAULT_CONFIG = {
     "H0": 150.0,
@@ -55,13 +56,25 @@ def save_config(cfg: dict) -> None:
 
 
 # ── Page setup ──────────────────────────────────────────────────────────────
+try:
+    from PIL import Image as _PIL_Image
+    _page_icon = _PIL_Image.open(ICON_PATH) if ICON_PATH.exists() else "🪨"
+except Exception:
+    _page_icon = "🪨"
+
 st.set_page_config(
     page_title="Triaxial Corrected Area",
-    page_icon="🪨",
+    page_icon=_page_icon,
     layout="wide",
 )
-st.title(f"Triaxial Test — Corrected Cross-Section Area  v{APP_VERSION}")
-st.caption("Developed by Kosit Jariyatatsakorn")
+
+_ic_col, _title_col = st.columns([1, 9])
+with _ic_col:
+    if ICON_PATH.exists():
+        st.image(str(ICON_PATH), use_container_width=True)
+with _title_col:
+    st.title(f"Triaxial Test — Corrected Cross-Section Area  v{APP_VERSION}")
+    st.caption("Developed by Kosit Jariyatatsakorn")
 
 # ── Password gate ────────────────────────────────────────────────────────────
 def _check_password() -> bool:
@@ -75,6 +88,10 @@ def _check_password() -> bool:
 
     _, mid, _ = st.columns([1, 2, 1])
     with mid:
+        if ICON_PATH.exists():
+            _, _ic, _ = st.columns([1, 1, 1])
+            with _ic:
+                st.image(str(ICON_PATH), use_container_width=True)
         st.markdown("### 🔒 Password Required")
         pwd = st.text_input("Enter password:", type="password", key="_pwd")
         if st.button("Login", use_container_width=True, type="primary"):
@@ -90,6 +107,10 @@ if not _check_password():
 
 # ── Sidebar: parameters ──────────────────────────────────────────────────────
 with st.sidebar:
+    if ICON_PATH.exists():
+        _, _sic, _ = st.columns([1, 2, 1])
+        with _sic:
+            st.image(str(ICON_PATH), use_container_width=True)
     st.header("Parameters")
     cfg = load_config()
 
