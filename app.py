@@ -7,6 +7,8 @@
 #                      How-to section, copyright, version history
 #   v3.0 (2026-06-12): Multiple LVDT support with aliases, full English UI,
 #                      version number in title
+#   v3.1 (2026-06-14): Minimal centered login card, blue Enter button,
+#                      removed icon from sidebar
 
 import io
 import json
@@ -23,8 +25,8 @@ from calculator import (
     read_dat_headers,
 )
 
-APP_VERSION = "3.0"
-APP_DATE = "2026-06-12"
+APP_VERSION = "3.1"
+APP_DATE = "2026-06-14"
 CONFIG_PATH = Path(__file__).parent / "config.json"
 ICON_PATH = Path(__file__).parent / "icon" / "icon_app.png"
 
@@ -86,20 +88,59 @@ def _check_password() -> bool:
     except (KeyError, FileNotFoundError):
         return True  # No password configured — allow access (local dev)
 
+    # Blue button CSS — only injected during login, not after auth
+    st.markdown("""
+    <style>
+    div[data-testid="stButton"] button {
+        background-color: #4A90D9 !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        font-size: 1rem !important;
+    }
+    div[data-testid="stButton"] button:hover {
+        background-color: #357abd !important;
+        color: white !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
     _, mid, _ = st.columns([1, 2, 1])
     with mid:
-        if ICON_PATH.exists():
-            _, _ic, _ = st.columns([1, 1, 1])
-            with _ic:
-                st.image(str(ICON_PATH), use_container_width=True)
-        st.markdown("### 🔒 Password Required")
-        pwd = st.text_input("Enter password:", type="password", key="_pwd")
-        if st.button("Login", use_container_width=True, type="primary"):
-            if pwd == correct:
-                st.session_state.authenticated = True
-                st.rerun()
-            else:
-                st.error("Incorrect password. Please try again.")
+        with st.container(border=True):
+            if ICON_PATH.exists():
+                _, _ic, _ = st.columns([1, 1, 1])
+                with _ic:
+                    st.image(str(ICON_PATH), use_container_width=True)
+
+            st.markdown(f"""
+            <div style="text-align:center; padding:10px 0 4px 0;">
+                <span style="font-size:1.2rem; font-weight:700;">
+                    Triaxial Test — Corrected Cross-Section Area
+                </span>
+                <span style="font-size:1rem; font-weight:600; color:#7EC8E3; margin-left:8px;">
+                    v{APP_VERSION}
+                </span>
+            </div>
+            <p style="text-align:center; color:#9aa0b0; font-size:0.85rem; margin:4px 0 16px 0;">
+                Lab access only — enter the password to continue.
+            </p>
+            """, unsafe_allow_html=True)
+
+            pwd = st.text_input(
+                "Password",
+                type="password",
+                placeholder="Password",
+                key="_pwd",
+                label_visibility="collapsed",
+            )
+            if st.button("Enter", use_container_width=True):
+                if pwd == correct:
+                    st.session_state.authenticated = True
+                    st.rerun()
+                else:
+                    st.error("Incorrect password. Please try again.")
     return False
 
 if not _check_password():
@@ -107,10 +148,6 @@ if not _check_password():
 
 # ── Sidebar: parameters ──────────────────────────────────────────────────────
 with st.sidebar:
-    if ICON_PATH.exists():
-        _, _sic, _ = st.columns([1, 2, 1])
-        with _sic:
-            st.image(str(ICON_PATH), use_container_width=True)
     st.header("Parameters")
     cfg = load_config()
 
@@ -180,7 +217,8 @@ with st.sidebar:
     st.divider()
     with st.expander("📋 Version History"):
         st.markdown(
-            f"**v{APP_VERSION}** ({APP_DATE}): Multiple LVDT support with aliases, full English UI  \n"
+            f"**v{APP_VERSION}** ({APP_DATE}): Minimal login card, blue button, sidebar cleanup  \n"
+            "**v3.0** (2026-06-12): Multiple LVDT support with aliases, full English UI  \n"
             "**v2.0** (2026-06-12): Temperature correction mode, column selector, How-to, copyright  \n"
             "**v1.0** (2026-06-11): Initial release"
         )
